@@ -11,7 +11,7 @@ export function build_connections_context_items(params = {}) {
   const seen_keys = new Set();
 
   const append_item = (item, score) => {
-    const key = item?.key;
+    const key = item?.key?.toLowerCase?.();
     if (!key || seen_keys.has(key)) return;
     seen_keys.add(key);
     items.push({ key, score });
