@@ -10,6 +10,17 @@ async function build_html(scope_plugin) {
         <button class="sc-share-workflow-button">Share workflow ⭐</button>
       </div>
       <div id="smart-lookup-header-callout"></div>
+      <div class="zvec-config-section">
+        <h3>zvec Configuration</h3>
+        <div class="setting-item">
+          <label for="zvec-api-key">API Key</label>
+          <input type="password" id="zvec-api-key" placeholder="Enter your zvec API key" />
+        </div>
+        <div class="setting-item">
+          <label for="zvec-endpoint">Endpoint</label>
+          <input type="text" id="zvec-endpoint" placeholder="Enter zvec endpoint URL" />
+        </div>
+      </div>
     </div>
   `;
 }
