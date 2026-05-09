@@ -27,6 +27,10 @@ import { register_smart_connections_codeblock } from "./views/connections_codebl
 import { build_connections_codeblock } from "./utils/build_connections_codeblock.js";
 
 export default class SmartConnectionsPlugin extends SmartPlugin {
+  constructor() {
+    super();
+    this.showEmbeddingNotifications = true;
+  }
   SmartEnv = SmartEnv;
   ReleaseNotesView = ReleaseNotesView;
 
