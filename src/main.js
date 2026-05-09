@@ -53,6 +53,9 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
 
   onload() {
     this.app.workspace.onLayoutReady(this.initialize.bind(this));
+    this.registerEvent(this.app.vault.on('create', this.handleFileChange.bind(this)));
+    this.registerEvent(this.app.vault.on('modify', this.handleFileChange.bind(this)));
+    this.registerEvent(this.app.vault.on('delete', this.handleFileChange.bind(this)));
     this.SmartEnv.create(this, this.smart_env_config);
     this.addSettingTab(new this.ConnectionsSettingsTab(this.app, this));
     add_smart_dice_icon();
@@ -133,6 +136,56 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
   }
 
   get settings() { return this.env?.settings || {}; }
+
+  /**
+   * Check if file should be processed based on exclusion settings
+   * @param {string} filePath - Path of the file to check
+   * @returns {boolean} - Whether file should be processed
+   */
+  shouldProcessFile(filePath) {
+    const exclusions = this.settings.excluded_files || [];
+    
+    // Check if file matches any exclusion pattern
+    for (const pattern of exclusions) {
+      if (filePath.includes(pattern)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  /**
+   * Handle file changes with exclusion checking
+   * @param {import('obsidian').TAbstractFile} file - File that changed
+   */
+  handleFileChange(file) {
+    // Only process markdown files
+    if (!(file instanceof window.File && file.extension === 'md')) {
+      return;
+    }
+
+    // Check exclusions
+    if (!this.shouldProcessFile(file.path)) {
+      return;
+    }
+
+    // Debounce processing to avoid conflicts with other plugins
+    clearTimeout(this._fileChangeTimeout);
+    this._fileChangeTimeout = setTimeout(() => {
+      this.processFileChange(file);
+    }, 100);
+  }
+
+  /**
+   * Process file changes
+   * @param {import('obsidian').TAbstractFile} file - File to process
+   */
+  processFileChange(file) {
+    // Implementation would go here based on existing file processing logic
+    // This is a placeholder that respects exclusions
+    console.log(`Processing file: ${file.path}`);
+  }
 
   /**
    * Sync connections view location with settings.
