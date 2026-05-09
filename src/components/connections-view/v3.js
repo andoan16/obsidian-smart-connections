@@ -65,6 +65,27 @@ export async function render(view, opts = {}) {
   this.apply_style_sheet(styles);
   const container = frag.querySelector('.sc-connections-view');
   post_process.call(this, view, container, opts);
+
+  // Add event listener for active note changes
+  if (view.plugin.app.workspace && !container._has_workspace_listener) {
+    container._has_workspace_listener = true;
+    const workspace = view.plugin.app.workspace;
+    
+    const refresh_on_active_leaf_change = () => {
+      // Only refresh if view is not paused
+      if (!view.paused) {
+        connections_view_refresh_handler.call(view, { target: container });
+      }
+    };
+    
+    workspace.on('active-leaf-change', refresh_on_active_leaf_change);
+    
+    // Clean up listener when view is destroyed
+    container.addEventListener('destroy', () => {
+      workspace.off('active-leaf-change', refresh_on_active_leaf_change);
+    });
+  }
+  
   return frag;
 }
 
@@ -191,6 +212,8 @@ export async function post_process(view, container, opts = {}) {
           })
         ;
       });
+
+      env.build_menu?.('connections_list', menu, connections_list);
 
       menu.addSeparator();
 
