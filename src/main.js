@@ -59,6 +59,16 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
     this.register_commands();
     this.register_item_views();
     this.register_ribbon_icons();
+    this.registerEvent(
+      this.app.workspace.on('active-leaf-change', () => {
+        this.handleNoteChange();
+      })
+    );
+    this.registerEvent(
+      this.app.workspace.on('file-open', () => {
+        this.handleNoteChange();
+      })
+    );
   }
 
   onunload() {
