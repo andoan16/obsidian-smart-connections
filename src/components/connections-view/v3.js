@@ -80,6 +80,16 @@ export async function post_process(view, container, opts = {}) {
   const sc_top_bar_context = container.querySelector('.sc-top-bar .sc-context');
   const env = view.env;
   let connections_item = opts.connections_item;
+  
+  // Initialize chat view if available
+  if (view.chat_view && typeof view.chat_view.initialize === 'function') {
+    try {
+      await view.chat_view.initialize();
+    } catch (error) {
+      console.warn('Chat view initialization failed:', error);
+    }
+  }
+  
   if (!connections_item) {
     list_container.textContent = 'No source item detected for current active view.';
     return container;
@@ -191,6 +201,8 @@ export async function post_process(view, container, opts = {}) {
           })
         ;
       });
+
+      env.build_menu?.('connections_list', menu, connections_list);
 
       menu.addSeparator();
 
