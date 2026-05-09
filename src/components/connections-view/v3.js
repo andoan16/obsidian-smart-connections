@@ -81,10 +81,20 @@ export async function post_process(view, container, opts = {}) {
   const env = view.env;
   let connections_item = opts.connections_item;
   if (!connections_item) {
+    // Clear loading timeout when no source item
+    clearTimeout(loadingTimeout);
     list_container.textContent = 'No source item detected for current active view.';
     return container;
   }
   let connections_list = connections_item.connections || env.connections_lists.new_item(connections_item);
+
+  // Add timeout and error handling for loading state
+  const loadingTimeout = setTimeout(() => {
+    if (list_container.textContent === 'Loading...') {
+      list_container.textContent = 'Loading timed out. Please try refreshing.';
+      console.warn('Smart Connections: Loading timeout exceeded');
+    }
+  }, 10000); // 10 second timeout
 
   // register container-level listeners in render since post_process is called frequently
   // (to refresh) while these listeners remain attached
@@ -110,6 +120,9 @@ export async function post_process(view, container, opts = {}) {
       const raw_results = Array.isArray(connections_list?.results) ? connections_list.results : [];
       const connections_state = connections_list?.item?.data?.connections || {};
       const visible_results = filter_hidden_results(raw_results, connections_state);
+
+      // Clear loading timeout when results are available
+      clearTimeout(loadingTimeout);
 
       menu.addItem((menu_item) => {
         menu_item
@@ -191,6 +204,8 @@ export async function post_process(view, container, opts = {}) {
           })
         ;
       });
+
+      env.build_menu?.('connections_list', menu, connections_list);
 
       menu.addSeparator();
 
