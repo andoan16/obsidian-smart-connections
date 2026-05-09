@@ -1,8 +1,30 @@
 import { StoryModal } from 'obsidian-smart-env/src/modals/story.js';
+
 async function build_html(scope_plugin) {
   return `
     <div>
       <div data-user-agreement></div>
+      <div class="performance-monitoring-section" style="margin-top: 1rem; padding: 1rem; background: var(--background-secondary); border-radius: 4px;">
+        <h3>Embedding Performance</h3>
+        <div class="performance-stats" style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+          <div class="stat-item">
+            <span class="stat-label">Avg. Response Time:</span>
+            <span class="stat-value" data-perf-response-time>N/A</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Tokens Processed:</span>
+            <span class="stat-value" data-perf-tokens>N/A</span>
+          </div>
+        </div>
+        <div class="model-config" style="margin-top: 1rem;">
+          <label for="embedding-model-select">Optimize for Model:</label>
+          <select id="embedding-model-select" style="width: 100%; margin-top: 0.5rem;">
+            <option value="default">Default Settings</option>
+            <option value="performance">Performance Mode</option>
+            <option value="quality">Quality Mode</option>
+          </select>
+        </div>
+      </div>
       <div class="actions-container">
         <button class="sc-getting-started-button">Getting started guide</button>
         <button class="sc-report-bug-button">Report a bug</button>
