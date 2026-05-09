@@ -14,8 +14,11 @@ export class ConnectionsItemView extends SmartItemView {
 
   async render_view(params = {}, container = this.container) {
     if(!params.connections_item) {
-      const active_path = this.plugin.app.workspace.getActiveFile()?.path;
-      params.connections_item = this.env.smart_sources.get(active_path);
+      const active_file = this.plugin.app.workspace.getActiveFile();
+      if (active_file) {
+        const active_path = active_file.path;
+        params.connections_item = this.env.smart_sources.get(active_path);
+      }
     }
     this.current = params.connections_item;
     this.pause_controls = null;
@@ -64,8 +67,12 @@ export class ConnectionsItemView extends SmartItemView {
         }
       }
     });
-    register_env_event_listener(this, 'item:embedded', (event) => {
-      if(event.item_key === this.current?.key && is_visible(this.container)){
+    register_env_event_listener(this, 'items:embedded', (event = {}) => {
+      if(
+        event.collection_key === this.current?.collection_key
+        && event.keys?.includes(this.current?.key)
+        && is_visible(this.container)
+      ){
         this.render_view({connections_item: this.current});
       }
     });
