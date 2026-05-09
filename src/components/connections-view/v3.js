@@ -80,6 +80,9 @@ export async function post_process(view, container, opts = {}) {
   const sc_top_bar_context = container.querySelector('.sc-top-bar .sc-context');
   const env = view.env;
   let connections_item = opts.connections_item;
+  if (!connections_item && view.file) {
+    connections_item = env.items.get(view.file.path);
+  }
   if (!connections_item) {
     list_container.textContent = 'No source item detected for current active view.';
     return container;
@@ -191,6 +194,8 @@ export async function post_process(view, container, opts = {}) {
           })
         ;
       });
+
+      env.build_menu?.('connections_list', menu, connections_list);
 
       menu.addSeparator();
 
