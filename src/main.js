@@ -69,33 +69,38 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
   }
 
   async initialize() {
-    this.smart_connections_view = null;
-    this.is_new_user().then(async (is_new) => {
-      if (!is_new) return;
-      setTimeout(() => {
-        StoryModal.open(this, {
-          title: 'Getting Started With Smart Connections',
-          url: 'https://smartconnections.app/story/smart-connections-getting-started/?utm_source=sc-op-new-user',
-        });
-      }, 1000);
+    try {
+      this.smart_connections_view = null;
+      this.is_new_user().then(async (is_new) => {
+        if (!is_new) return;
+        setTimeout(() => {
+          StoryModal.open(this, {
+            title: 'Getting Started With Smart Connections',
+            url: 'https://smartconnections.app/story/smart-connections-getting-started/?utm_source=sc-op-new-user',
+          });
+        }, 1000);
+        await this.SmartEnv.wait_for({ loaded: true });
+        setTimeout(() => {
+          this.apply_connections_view_location();
+          this.open_connections_view();
+        }, 1000);
+        this.add_to_gitignore("\n\n# Ignore Smart Environment folder\n.smart-env");
+      });
       await this.SmartEnv.wait_for({ loaded: true });
-      setTimeout(() => {
-        this.apply_connections_view_location();
-        this.open_connections_view();
-      }, 1000);
-      this.add_to_gitignore("\n\n# Ignore Smart Environment folder\n.smart-env");
-    });
-    await this.SmartEnv.wait_for({ loaded: true });
-    this.wrap_connections_view_open();
-    this.apply_connections_view_location();
-    this.register_connections_view_location_listener();
-    register_smart_connections_codeblock(this);
-    if (!this.connections_footer_view) {
-      this.registerEditorExtension(connections_footer_plugin);
-      this.connections_footer_view = new ConnectionsFooterView(this);
+      this.wrap_connections_view_open();
+      this.apply_connections_view_location();
+      this.register_connections_view_location_listener();
+      register_smart_connections_codeblock(this);
+      if (!this.connections_footer_view) {
+        this.registerEditorExtension(connections_footer_plugin);
+        this.connections_footer_view = new ConnectionsFooterView(this);
+      }
+      this.toggled_footer_connections();
+      await this.check_for_updates();
+    } catch (error) {
+      console.error('Error initializing Smart Connections:', error);
+      new Notice('Failed to initialize Smart Connections. Please check the console for details.');
     }
-    this.toggled_footer_connections();
-    await this.check_for_updates();
   }
 
   get ribbon_icons() {
@@ -103,20 +108,39 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
       connections: {
         icon_name: "smart-connections",
         description: "Smart Connections: Open connections view",
-        callback: () => { this.open_connections_view(); }
+        callback: () => { 
+          try {
+            this.open_connections_view();
+          } catch (error) {
+            console.error('Error opening connections view:', error);
+            new Notice('Failed to open connections view. Please check the console for details.');
+          }
+        }
       },
       footer_connections: {
         description: 'Toggle Footer Connections',
         icon_name: 'smart-footer-connections',
         callback: () => {
-          const settings = this.env.connections_lists.settings;
-          settings.footer_connections = !settings.footer_connections;
+          try {
+            const settings = this.env.connections_lists.settings;
+            settings.footer_connections = !settings.footer_connections;
+          } catch (error) {
+            console.error('Error toggling footer connections:', error);
+            new Notice('Failed to toggle footer connections. Please check the console for details.');
+          }
         }
       },
       random_note: {
         icon_name: "smart-dice",
         description: "Smart Connections: Open random connection",
-        callback: () => { this.open_random_connection(); }
+        callback: () => { 
+          try {
+            this.open_random_connection();
+          } catch (error) {
+            console.error('Error opening random connection:', error);
+            new Notice('Failed to open random connection. Please check the console for details.');
+          }
+        }
       },
       // TEMP during transition to Lookup as standalone plugin (conditionally include ribbon icon if Smart Lookup is not enabled to avoid conflicts)
       ...(app.plugins.enabledPlugins.has('smart-lookup')
@@ -125,7 +149,14 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
           lookup: {
             icon_name: "smart-lookup",
             description: "Smart Lookup: Open lookup view",
-            callback: () => { this.open_lookup_view_connections(); }
+            callback: () => { 
+              try {
+                this.open_lookup_view_connections();
+              } catch (error) {
+                console.error('Error opening lookup view:', error);
+                new Notice('Failed to open lookup view. Please check the console for details.');
+              }
+            }
           },
         }
       ),
