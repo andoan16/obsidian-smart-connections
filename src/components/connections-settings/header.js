@@ -1,7 +1,43 @@
 import { StoryModal } from 'obsidian-smart-env/src/modals/story.js';
+
+function showMobileLoadPrompt(plugin) {
+  if (!plugin.env.is_mobile || plugin.settings.mobileEnvLoaded) return false;
+  
+  const prompt = document.createElement('div');
+  prompt.className = 'mobile-load-prompt';
+  prompt.innerHTML = `
+    <div class="callout" data-callout="warning">
+      <div class="callout-title">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-title-inner">Smart Environment Deferred on Mobile</div>
+      </div>
+      <div class="callout-content">
+        <p>Smart Connections environment is deferred on mobile to improve app performance.</p>
+        <button class="mobile-load-button">Load Smart Environment</button>
+      </div>
+    </div>
+  `;
+  
+  const loadButton = prompt.querySelector('.mobile-load-button');
+  loadButton?.addEventListener('click', async () => {
+    plugin.settings.mobileEnvLoaded = true;
+    await plugin.saveSettings();
+    prompt.remove();
+    // Reload or initialize the environment
+    if (plugin.env) {
+      await plugin.env.initialize();
+    }
+  });
+  
+  return prompt;
+}
+
 async function build_html(scope_plugin) {
+  const mobilePrompt = showMobileLoadPrompt(scope_plugin);
+  
   return `
     <div>
+      ${mobilePrompt ? '<div id="mobile-load-container"></div>' : ''}
       <div data-user-agreement></div>
       <div class="actions-container">
         <button class="sc-getting-started-button">Getting started guide</button>
@@ -23,6 +59,15 @@ export async function render(scope_plugin) {
 }
 
 export async function post_process(scope_plugin, frag) {
+  // Insert mobile load prompt if needed
+  const mobileContainer = frag.querySelector('#mobile-load-container');
+  if (mobileContainer && !scope_plugin.settings.mobileEnvLoaded) {
+    const prompt = showMobileLoadPrompt(scope_plugin);
+    if (prompt) {
+      mobileContainer.appendChild(prompt);
+    }
+  }
+
   /* user agreement & env settings */
   const user_agreement_container = frag.querySelector('[data-user-agreement]');
   if (user_agreement_container) {
