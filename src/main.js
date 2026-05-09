@@ -27,6 +27,12 @@ import { register_smart_connections_codeblock } from "./views/connections_codebl
 import { build_connections_codeblock } from "./utils/build_connections_codeblock.js";
 
 export default class SmartConnectionsPlugin extends SmartPlugin {
+  /**
+   * Default embedding model selection logic:
+   * - Prioritizes cost-effective models for basic similarity tasks
+   * - Balances quality and performance based on user settings
+   * - Falls back to default model if custom selection unavailable
+   */
   SmartEnv = SmartEnv;
   ReleaseNotesView = ReleaseNotesView;
 
