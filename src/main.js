@@ -59,6 +59,8 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
     this.register_commands();
     this.register_item_views();
     this.register_ribbon_icons();
+    // Track if user has chosen to load on mobile to prevent infinite loop
+    this.mobileLoadDeferred = false;
   }
 
   onunload() {
