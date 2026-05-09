@@ -26,6 +26,8 @@ export async function post_process(connections_list, container, opts = {}) {
   const graph_container = container.querySelector('.connections-graph-container');
   const list_container = container.querySelector('.connections-list.sc-list');
   container.dataset.key = connections_list.item.key;
+  // Ensure nested paths are handled correctly
+  list_container.dataset.key = connections_list.item.key;
   const results = await connections_list.get_results(opts);
   const connections_settings = opts.connections_settings // use opts.connections_settings for passing codeblock or footer-specific settings
     ?? env.connections_lists.settings
