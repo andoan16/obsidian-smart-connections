@@ -10,6 +10,8 @@ export class ConnectionsItemView extends SmartItemView {
     this.paused = false;
     this.pause_controls = null;
     this.current = null;
+    // Initialize container reference
+    this.container = this.contentEl;
   }
 
   async render_view(params = {}, container = this.container) {
@@ -19,13 +21,29 @@ export class ConnectionsItemView extends SmartItemView {
     }
     this.current = params.connections_item;
     this.pause_controls = null;
-    const frag = await this.env.smart_components.render_component('connections_view_v3', this, {
-      connections_item: params.connections_item,
-    });
-    container.empty();
-    container.appendChild(frag);
-    this.register_env_listeners();
-    this.env.events.emit('connections:opened')
+    
+    // Ensure container is valid before rendering
+    if (!container || !container.parentNode) {
+      console.warn('Container not ready for rendering');
+      return;
+    }
+    
+    try {
+      const frag = await this.env.smart_components.render_component('connections_view_v3', this, {
+        connections_item: params.connections_item,
+      });
+      container.empty();
+      container.appendChild(frag);
+      this.register_env_listeners();
+      this.env.events.emit('connections:opened');
+    } catch (error) {
+      console.error('Error rendering connections view:', error);
+      container.empty();
+      container.createEl('div', { 
+        text: 'Failed to load connections', 
+        cls: 'connections-error' 
+      });
+    }
   }
 
   async open_settings(){
@@ -40,6 +58,7 @@ export class ConnectionsItemView extends SmartItemView {
       if (this.paused) return;
       if (!is_visible(this.container)) return;
       const connections_item = this.env[event.collection_key || 'smart_sources']?.get(event.item_key || event.key);
+      if (!connections_item) return;
       if (connections_item.key === this.current?.key) return;
       if (handle_current_source_debounce) clearTimeout(handle_current_source_debounce);
       handle_current_source_debounce = setTimeout(() => {
@@ -64,8 +83,12 @@ export class ConnectionsItemView extends SmartItemView {
         }
       }
     });
-    register_env_event_listener(this, 'item:embedded', (event) => {
-      if(event.item_key === this.current?.key && is_visible(this.container)){
+    register_env_event_listener(this, 'items:embedded', (event = {}) => {
+      if(
+        event.collection_key === this.current?.collection_key
+        && event.keys?.includes(this.current?.key)
+        && is_visible(this.container)
+      ){
         this.render_view({connections_item: this.current});
       }
     });
