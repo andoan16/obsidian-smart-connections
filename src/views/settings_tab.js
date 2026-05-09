@@ -5,6 +5,11 @@ export class ScEarlySettingsTab extends SmartPluginSettingsTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
+    this.initialization_timeout = 10000; // 10 second timeout
+  }
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
   }
 
   hide(){
@@ -22,6 +27,14 @@ export class ScEarlySettingsTab extends SmartPluginSettingsTab {
     if (!container) return;
     container.empty?.();
     container.innerHTML = '<div class="sc-loading">Loading main settings...</div>';
+
+    try {
+      await this.initialize_smart_connections();
+    } catch (error) {
+      console.error('Failed to initialize smart connections:', error);
+      container.innerHTML = '<div class="sc-error">Failed to load settings. Please check the console for details.</div>';
+      return;
+    }
 
     container.empty?.();
 
