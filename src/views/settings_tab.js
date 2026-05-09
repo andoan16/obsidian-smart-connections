@@ -31,6 +31,18 @@ export class ScEarlySettingsTab extends SmartPluginSettingsTab {
     });
     cl_container.createEl('h1', { text: 'Connections' });
     
+    // Add embedding model information section
+    const embeddingInfo = cl_container.createDiv({ cls: 'sc-settings-info' });
+    embeddingInfo.createEl('p', { 
+      text: 'Smart Connections uses OpenAI text-embedding-3-small as the default embedding model. This model provides a good balance of performance and cost efficiency.' 
+    });
+    embeddingInfo.createEl('p', { 
+      text: 'For higher quality embeddings at increased cost, you can configure text-embedding-3-large in the API settings.' 
+    });
+    embeddingInfo.createEl('small', { 
+      text: 'Note: Changing embedding models requires reprocessing existing connections.' 
+    });
+    
     const connections_lists_settings_config = this.env.config.collections.connections_lists.settings_config;
     render_settings_config(
       connections_lists_settings_config,
