@@ -161,7 +161,11 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
       return;
     }
     const desired_location = ConnectionsItemView.default_open_location;
-    const connections_leaf = ConnectionsItemView.get_leaf(workspace);
+    const connections_leaf = workspace.getLeavesOfType(ConnectionsItemView.view_type)?.[0];
+    if (!connections_leaf) return;
+    if (should_relocate_leaf(connections_leaf, desired_location)) {
+      workspace.moveLeafToEdge(connections_leaf, desired_location);
+    }nsItemView.get_leaf(workspace);
     if (!should_relocate_leaf({ workspace, leaf: connections_leaf, desired_location })) {
       return;
     }
