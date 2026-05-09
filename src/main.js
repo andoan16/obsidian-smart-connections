@@ -53,7 +53,12 @@ export default class SmartConnectionsPlugin extends SmartPlugin {
 
   onload() {
     this.app.workspace.onLayoutReady(this.initialize.bind(this));
-    this.SmartEnv.create(this, this.smart_env_config);
+    try {
+      this.SmartEnv.create(this, this.smart_env_config);
+    } catch (error) {
+      console.error('Failed to initialize SmartEnv:', error);
+      new Notice('Smart Connections: Failed to load embedding model. Please check your settings.');
+    }
     this.addSettingTab(new this.ConnectionsSettingsTab(this.app, this));
     add_smart_dice_icon();
     this.register_commands();
