@@ -32,6 +32,18 @@ export class ScEarlySettingsTab extends SmartPluginSettingsTab {
     cl_container.createEl('h1', { text: 'Connections' });
     
     const connections_lists_settings_config = this.env.config.collections.connections_lists.settings_config;
+
+    // Add notification control setting
+    const notifications_setting = {
+      key: 'suppress_embedding_notifications',
+      name: 'Suppress embedding notifications',
+      description: 'Reduce notification interruptions during embedding operations',
+      type: 'toggle',
+      default: false
+    };
+
+    // Insert notification setting at beginning of settings config
+    connections_lists_settings_config.unshift(notifications_setting);
     render_settings_config(
       connections_lists_settings_config,
       this.env.connections_lists,
